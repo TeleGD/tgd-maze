@@ -1,17 +1,17 @@
 package app.ui;
 
-import java.awt.Font;
 import java.util.ArrayList;
 
 import org.newdawn.slick.Color;
+import org.newdawn.slick.Font;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.state.StateBasedGame;
 
-import app.utils.FontUtils;
+import app.AppFont;
+import app.AppLoader;
 
 /**
  * TextField Personnalisable a gogo
@@ -40,8 +40,8 @@ public class TextField extends TGDComponent{
 	private Color textColor;
 	private Color cursorColor;
 
-	private TrueTypeFont textFont;
-	private TrueTypeFont placeHolderFont;
+	private Font textFont;
+	private Font placeHolderFont;
 
 	private int textSize;
 	private int placeHolderTextSize;
@@ -75,12 +75,12 @@ public class TextField extends TGDComponent{
 		setPlaceHolder("Entrez votre texte...");
 		setPlaceHolderTextSize(15);
 		setPlaceHolderColor(new Color(140, 140, 140));
-		setPlaceHolderFont(FontUtils.loadSystemFont("Verdana", Font.PLAIN, placeHolderTextSize));
+		setPlaceHolderFont(AppLoader.loadFont("/fonts/vt323.ttf", AppFont.PLAIN, placeHolderTextSize));
 
 		setText("");
 		setTextSize(15);
 		setTextColor(new Color(255, 255, 255));
-		setTextFont(FontUtils.loadSystemFont("Verdana", Font.BOLD, textSize));
+		setTextFont(AppLoader.loadFont("/fonts/vt323.ttf", AppFont.BOLD, textSize));
 
 		setPaddingLeft(10);
 		setPaddingRight(10);
@@ -171,19 +171,19 @@ public class TextField extends TGDComponent{
 		this.textColor = textColor;
 	}
 
-	public TrueTypeFont getTextFont() {
+	public Font getTextFont() {
 		return textFont;
 	}
 
-	public void setTextFont(TrueTypeFont textFont) {
+	public void setTextFont(Font textFont) {
 		this.textFont = textFont;
 	}
 
-	public TrueTypeFont getPlaceHolderFont() {
+	public Font getPlaceHolderFont() {
 		return placeHolderFont;
 	}
 
-	public void setPlaceHolderFont(TrueTypeFont placeHolderFont) {
+	public void setPlaceHolderFont(Font placeHolderFont) {
 		this.placeHolderFont = placeHolderFont;
 	}
 

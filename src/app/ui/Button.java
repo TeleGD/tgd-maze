@@ -1,14 +1,14 @@
 package app.ui;
 
-import java.awt.Font;
 import org.newdawn.slick.Color;
+import org.newdawn.slick.Font;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.state.StateBasedGame;
 
-import app.utils.FontUtils;
+import app.AppFont;
+import app.AppLoader;
 
 @SuppressWarnings("serial")
 public class Button extends TGDComponent{
@@ -19,7 +19,7 @@ public class Button extends TGDComponent{
 	private Color textColorEntered;
 	private Color textColorPressed;
 
-	private TrueTypeFont textFont;
+	private Font textFont;
 	private int textSize;
 
 	private boolean upperCaseLock;
@@ -42,7 +42,7 @@ public class Button extends TGDComponent{
 		setTextColor(new Color(255,255,255));
 		setTextColorPressed(new Color(255,255,255));
 		setTextColorEntered(new Color(0,0,0));
-		setTextFont(FontUtils.loadSystemFont("Verdana", Font.BOLD, textSize));
+		setTextFont(AppLoader.loadFont("/fonts/vt323.ttf",AppFont.BOLD,textSize));
 
 		setPaddingTop(5);
 		setPaddingBottom(5);
@@ -106,11 +106,11 @@ public class Button extends TGDComponent{
 		this.textColor = textColor;
 	}
 
-	public TrueTypeFont getTextFont() {
+	public Font getTextFont() {
 		return textFont;
 	}
 
-	public void setTextFont(TrueTypeFont textFont) {
+	public void setTextFont(Font textFont) {
 		this.textFont = textFont;
 	}
 

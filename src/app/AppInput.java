@@ -17,7 +17,7 @@ public class AppInput extends Input {
 	public static final int BUTTON_SL = 1024;
 	public static final int BUTTON_SR = 2048;
 	public static final int BUTTON_UP = 4096;
-	public static final int BUTTON_DOWN = 80192;
+	public static final int BUTTON_DOWN = 8192;
 	public static final int BUTTON_LEFT = 16384;
 	public static final int BUTTON_RIGHT = 32768;
 	public static final int AXIS_XL = 0;
@@ -31,6 +31,16 @@ public class AppInput extends Input {
 	private boolean pollFlag;
 	private int [] controls;
 	private int [] controllerPressed;
+	private int [] controllerMoved;
+
+	private float scale;
+	private float offsetX;
+	private float offsetY;
+
+	private float scaleX;
+	private float scaleY;
+	private float xoffset;
+	private float yoffset;
 
 	public AppInput (int height) {
 		super (height);
@@ -38,6 +48,68 @@ public class AppInput extends Input {
 		int controllerCount = this.getControllerCount ();
 		this.controls = new int [controllerCount];
 		this.controllerPressed = new int [controllerCount];
+		this.controllerMoved = new int [controllerCount];
+		this.scaleX = 1;
+		this.scaleY = 1;
+		this.xoffset = 0;
+		this.yoffset = 0;
+	}
+
+	void setCanvasClip (float scale, float offsetX, float offsetY) {
+		this.scale = scale;
+		this.offsetX = offsetX;
+		this.offsetY = offsetY;
+		float scaleX = this.scaleX / this.scale;
+		float scaleY = this.scaleY / this.scale;
+		float xoffset = this.xoffset - this.offsetX * scaleX;
+		float yoffset = this.yoffset - this.offsetY * scaleY;
+		super.setOffset (xoffset, yoffset);
+		super.setScale (scaleX, scaleY);
+	}
+
+	@Override
+	public int getAbsoluteMouseX () {
+		return (int) ((super.getAbsoluteMouseX () - this.offsetX) / this.scale);
+	}
+
+	@Override
+	public int getAbsoluteMouseY () {
+		return (int) ((super.getAbsoluteMouseY () - this.offsetY) / this.scale);
+	}
+
+	@Override
+	public void setScale (float scaleX, float scaleY) {
+		this.scaleX = scaleX;
+		this.scaleY = scaleY;
+		scaleX /= this.scale;
+		scaleY /= this.scale;
+		float xoffset = this.xoffset - this.offsetX * scaleX;
+		float yoffset = this.yoffset - this.offsetY * scaleY;
+		super.setOffset (xoffset, yoffset);
+		super.setScale (scaleX, scaleY);
+	}
+
+	@Override
+	public void setOffset (float xoffset, float yoffset) {
+		this.xoffset = xoffset;
+		this.yoffset = yoffset;
+		xoffset -= this.offsetX * this.scaleX / this.scale;
+		yoffset -= this.offsetY * this.scaleY / this.scale;
+		super.setOffset (xoffset, yoffset);
+	}
+
+	@Override
+	public void resetInputTransform () {
+		this.scaleX = 1;
+		this.scaleY = 1;
+		this.xoffset = 0;
+		this.yoffset = 0;
+		float scaleX = 1 / this.scale;
+		float scaleY = 1 / this.scale;
+		float xoffset = -this.offsetX * scaleX;
+		float yoffset = -this.offsetY * scaleY;
+		super.setOffset (xoffset, yoffset);
+		super.setScale (scaleX, scaleY);
 	}
 
 	@Override
@@ -46,15 +118,21 @@ public class AppInput extends Input {
 		super.poll (width, height);
 		for (int i = 0, l = this.getControllerCount (); i < l; i++) {
 			try {
-				if (((this.controls [i] & 1) == 0) == super.getAxisValue (i, 4) > .5f) {
+				float value = super.getAxisValue (i, 4);
+				if (((this.controllerMoved [i] & 16) == 0)) {
+					if (value == -1f) {
+						value = 0f;
+					} else {
+						this.controllerMoved [i] |= 16;
+					}
+				}
+				if (((this.controls [i] & 1) == 0) == value > .5f) {
 					this.controls [i] ^= 1;
 					if ((this.controls [i] & 1) != 0) {
 						this.controllerPressed [i] |= 1;
 					}
 				}
-			} catch (IndexOutOfBoundsException exception) {}
-			try {
-				if (((this.controls [i] & 2) == 0) == super.getAxisValue (i, 4) < -.5f) {
+				if (((this.controls [i] & 2) == 0) == value < -.5f) {
 					this.controls [i] ^= 2;
 					if ((this.controls [i] & 2) != 0) {
 						this.controllerPressed [i] |= 2;
@@ -98,15 +176,35 @@ public class AppInput extends Input {
 		for (int i = 0, j = 0, l = AppInput.BUTTON_COUNT; i < l; i++, j++) {
 			if (i == 6) {
 				try {
-					if ((buttons & 1) != 0 && super.getAxisValue (controller, 4) > .5f) {
-						return true;
+					if ((buttons & 1) != 0) {
+						float value = super.getAxisValue (controller, 4);
+						if (((this.controllerMoved [controller] & 16) == 0)) {
+							if (value == -1f) {
+								value = 0f;
+							} else {
+								this.controllerMoved [controller] |= 16;
+							}
+						}
+						if (value > .5f) {
+							return true;
+						}
 					}
 				} catch (IndexOutOfBoundsException exception) {}
 				j--;
 			} else if (i == 7) {
 				try {
-					if ((buttons & 1) != 0 && super.getAxisValue (controller, 4) < -.5f) {
-						return true;
+					if ((buttons & 1) != 0) {
+						float value = super.getAxisValue (controller, 4);
+						if (((this.controllerMoved [controller] & 16) == 0)) {
+							if (value == -1f) {
+								value = 0f;
+							} else {
+								this.controllerMoved [controller] |= 16;
+							}
+						}
+						if (value < -.5f) {
+							return true;
+						}
 					}
 				} catch (IndexOutOfBoundsException exception) {}
 				j--;
@@ -145,15 +243,7 @@ public class AppInput extends Input {
 		return false;
 	}
 
-	// public boolean areButtonsPressed (int buttons, int controller) {
-	// 	for (int i = 0; i < AppInput.BUTTON_COUNT; i++) {
-	// 		if ((buttons & 1) != 0 && !super.isButtonPressed (i, controller)) {
-	// 			return false;
-	// 		}
-	// 		buttons >>>= 1;
-	// 	}
-	// 	return true;
-	// }
+	// public boolean areButtonsPressed (int buttons, int controller) {}
 
 	public int getButtonCount (int controller) {
 		return AppInput.BUTTON_COUNT;
@@ -193,15 +283,7 @@ public class AppInput extends Input {
 		return false;
 	}
 
-	// public boolean areControlsPressed (int buttons, int controller) {
-	// 	for (int i = 0; i < AppInput.BUTTON_COUNT + 4; i++) {
-	// 		if ((buttons & 1) != 0 && !super.isControlPressed (buttons, controller)) {
-	// 			return false;
-	// 		}
-	// 		buttons >>>= 1;
-	// 	}
-	// 	return true;
-	// }
+	// public boolean areControlsPressed (int buttons, int controller) {}
 
 	public int getControlCount (int controller) {
 		return AppInput.BUTTON_COUNT;
@@ -221,10 +303,16 @@ public class AppInput extends Input {
 	public float getAxisValue (int axis, int controller) {
 		try {
 			if (axis < AppInput.AXIS_COUNT) {
-				return super.getAxisValue (controller, axis ^ 1);
+				float value = super.getAxisValue (controller, axis ^ 1);
+				if ((this.controllerMoved [controller] & (1 << axis)) != 0) {
+					return value;
+				} else if (value != -1f) {
+					this.controllerMoved [controller] |= (1 << axis);
+					return value;
+				}
 			}
 		} catch (IndexOutOfBoundsException exception) {}
-		return 0;
+		return 0f;
 	}
 
 	@Override

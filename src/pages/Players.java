@@ -3,24 +3,34 @@ package pages;
 import org.newdawn.slick.Font;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Input;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.state.transition.FadeInTransition;
 import org.newdawn.slick.state.transition.FadeOutTransition;
 
+import app.AppFont;
 import app.AppGame;
 import app.AppInput;
+import app.AppLoader;
 import app.AppPage;
 import app.AppPlayer;
-import app.AppWorld;
-import app.utils.FontUtils;
 
 public class Players extends AppPage {
 
-	static private Font playersFont = FontUtils.loadFont ("Kalinga", java.awt.Font.BOLD, 14, true);
+	static private Font playersFont;
 
-	// static private int playersLineHeight = 30;
+	// static private int playersLineHeight;
 
-	private int ID;
+	static {
+		Players.playersFont = AppLoader.loadFont ("/fonts/vt323.ttf", AppFont.BOLD, 24);
+
+		// Players.playersLineHeight = 30;
+	}
+
+	private boolean backFlag;
+	private boolean forwardFlag;
+	private int leftFlags;
+	private int rightFlags;
 	private int previousID;
 	private int nextID;
 
@@ -34,12 +44,7 @@ public class Players extends AppPage {
 	private int playersColumnWidth;
 
 	public Players (int ID) {
-		this.ID = ID;
-	}
-
-	@Override
-	public int getID () {
-		return this.ID;
+		super (ID);
 	}
 
 	@Override
@@ -47,6 +52,10 @@ public class Players extends AppPage {
 		super.initSize (container, game, 600, 400);
 		super.init (container, game);
 
+		this.backFlag = false;
+		this.forwardFlag = false;
+		this.leftFlags = 0;
+		this.rightFlags = 0;
 		this.previousID = -1;
 		this.nextID = -1;
 
@@ -68,9 +77,13 @@ public class Players extends AppPage {
 	}
 
 	@Override
-	public void update (GameContainer container, StateBasedGame game, int delta) {
-		super.update (container, game, delta);
+	public void poll (GameContainer container, StateBasedGame game, Input user) {
+		super.poll (container, game, user);
 		AppInput appInput = (AppInput) container.getInput ();
+		this.backFlag = false;
+		this.forwardFlag = false;
+		this.leftFlags = 0;
+		this.rightFlags = 0;
 		AppGame appGame = (AppGame) game;
 		loop: for (int i = 0, l = appInput.getControllerCount (); i < l; i++) {
 			boolean BUTTON_A = appInput.isButtonPressed (AppInput.BUTTON_A, i);
@@ -88,7 +101,7 @@ public class Players extends AppPage {
 				int colorID = appGame.availableColorIDs.remove (0);
 				String name = "Joueur " + AppPlayer.COLOR_NAMES [colorID]; // TODO: set user name
 				appGame.appPlayers.add (new AppPlayer (colorID, i, name, AppInput.BUTTON_A));
-				if (appGame.appPlayers.size () == 2) {
+				if (appGame.appPlayers.size () >= 2 && !this.hintVisibility) {
 					this.hintVisibility = true;
 				}
 			}
@@ -101,36 +114,28 @@ public class Players extends AppPage {
 				appPlayer.setButtonPressedRecord (record ^ AppInput.BUTTON_B);
 				if (BUTTON_B) {
 					appGame.availableColorIDs.add (0, appGame.appPlayers.remove (i).getColorID ());
-					if (appGame.appPlayers.size () == 1) {
+					if (appGame.appPlayers.size () < 2 && this.hintVisibility) {
 						this.hintVisibility = false;
 					}
 				}
 			}
 		}
-		for (int i = appGame.appPlayers.size () - 1; i >= 0; i--) {
+		for (int i = 0, j = 1, l = appGame.appPlayers.size (); i < l; i++, j <<= 1) {
 			AppPlayer appPlayer = appGame.appPlayers.get (i);
-			int j = appPlayer.getControllerID ();
-			boolean BUTTON_L = appInput.isButtonPressed (AppInput.BUTTON_L, j);
-			boolean BUTTON_R = appInput.isButtonPressed (AppInput.BUTTON_R, j);
+			int ID = appPlayer.getControllerID ();
+			boolean BUTTON_L = appInput.isButtonPressed (AppInput.BUTTON_L, ID);
+			boolean BUTTON_R = appInput.isButtonPressed (AppInput.BUTTON_R, ID);
 			int record = appPlayer.getButtonPressedRecord ();
 			if (BUTTON_L == ((record & AppInput.BUTTON_L) == 0)) {
 				record ^= AppInput.BUTTON_L;
 				if (BUTTON_L) {
-					appGame.availableColorIDs.add (0, appPlayer.getColorID ());
-					int colorID = appGame.availableColorIDs.remove (appGame.availableColorIDs.size () - 1);
-					String name = "Joueur " + AppPlayer.COLOR_NAMES [colorID]; // TODO: set user name
-					appPlayer.setColorID (colorID);
-					appPlayer.setName (name);
+					this.leftFlags |= j;
 				}
 			}
 			if (BUTTON_R == ((record & AppInput.BUTTON_R) == 0)) {
 				record ^= AppInput.BUTTON_R;
 				if (BUTTON_R) {
-					appGame.availableColorIDs.add (appPlayer.getColorID ());
-					int colorID = appGame.availableColorIDs.remove (0);
-					String name = "Joueur " + AppPlayer.COLOR_NAMES [colorID]; // TODO: set user name
-					appPlayer.setColorID (colorID);
-					appPlayer.setName (name);
+					this.rightFlags |= j;
 				}
 			}
 			appPlayer.setButtonPressedRecord (record);
@@ -143,18 +148,49 @@ public class Players extends AppPage {
 			int gameMasterRecord = gameMaster.getButtonPressedRecord ();
 			if (BUTTON_A == ((gameMasterRecord & AppInput.BUTTON_A) == 0)) {
 				gameMasterRecord ^= AppInput.BUTTON_A;
-				if (BUTTON_A && this.nextID != -1) {
-					((AppWorld) appGame.getState (this.nextID)).play (container, appGame);
-					appGame.enterState (this.nextID, new FadeOutTransition (), new FadeInTransition ());
-				}
+				this.forwardFlag = BUTTON_A;
 			}
 			if (BUTTON_B == ((gameMasterRecord & AppInput.BUTTON_B) == 0)) {
 				gameMasterRecord ^= AppInput.BUTTON_B;
-				if (BUTTON_B && this.previousID != -1) {
-					appGame.enterState (this.previousID);
-				}
+				this.backFlag = BUTTON_B;
 			}
 			gameMaster.setButtonPressedRecord (gameMasterRecord);
+		}
+	}
+
+	@Override
+	public void update (GameContainer container, StateBasedGame game, int delta) {
+		super.update (container, game, delta);
+		AppGame appGame = (AppGame) game;
+		if (this.backFlag) {
+			if (this.previousID != -1) {
+				appGame.enterState (this.previousID);
+			}
+		}
+		if (this.forwardFlag) {
+			if (this.nextID != -1) {
+				appGame.enterState (this.nextID, new FadeOutTransition (), new FadeInTransition ());
+			}
+		}
+		for (int i = 0, j = this.leftFlags; j != 0; i++, j >>>= 1) {
+			if ((j & 1) != 0) {
+				AppPlayer appPlayer = appGame.appPlayers.get (i);
+				appGame.availableColorIDs.add (0, appPlayer.getColorID ());
+				int colorID = appGame.availableColorIDs.remove (appGame.availableColorIDs.size () - 1);
+				String name = "Joueur " + AppPlayer.COLOR_NAMES [colorID]; // TODO: set user name
+				appPlayer.setColorID (colorID);
+				appPlayer.setName (name);
+			}
+		}
+		for (int i = 0, j = this.rightFlags; j != 0; i++, j >>>= 1) {
+			if ((j & 1) != 0) {
+				AppPlayer appPlayer = appGame.appPlayers.get (i);
+				appGame.availableColorIDs.add (appPlayer.getColorID ());
+				int colorID = appGame.availableColorIDs.remove (0);
+				String name = "Joueur " + AppPlayer.COLOR_NAMES [colorID]; // TODO: set user name
+				appPlayer.setColorID (colorID);
+				appPlayer.setName (name);
+			}
 		}
 	}
 

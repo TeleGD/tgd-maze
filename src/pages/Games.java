@@ -13,15 +13,8 @@ import app.elements.MenuItem;
 
 public class Games extends AppMenu {
 
-	private int ID;
-
 	public Games (int ID) {
-		this.ID = ID;
-	}
-
-	@Override
-	public int getID () {
-		return this.ID;
+		super (ID);
 	}
 
 	@Override
@@ -31,27 +24,14 @@ public class Games extends AppMenu {
 		this.setTitle ("Menu des jeux");
 		this.setSubtitle ("Sans sous-titre");
 		this.setMenu (Arrays.asList (new MenuItem [] {
-			new MenuItem (AppGame.TITLES [AppGame.GAMES_BOMBERMAN_WORLD]) {
+			new MenuItem (AppGame.TITLES [AppGame.GAMES_MAZE_WORLD]) {
 				public void itemSelected () {
 					Players players = (Players) game.getState (AppGame.PAGES_PLAYERS);
+					Pause pause = (Pause) game.getState (AppGame.PAGES_PAUSE);
 					players.setPreviousID (AppGame.PAGES_GAMES);
-					players.setNextID (AppGame.GAMES_BOMBERMAN_WORLD);
-					game.enterState (AppGame.PAGES_PLAYERS);
-				}
-			},
-			new MenuItem (AppGame.TITLES [AppGame.GAMES_LABYRINTHE_WORLD]) {
-				public void itemSelected () {
-					Players players = (Players) game.getState (AppGame.PAGES_PLAYERS);
-					players.setPreviousID (AppGame.PAGES_GAMES);
-					players.setNextID (AppGame.GAMES_LABYRINTHE_WORLD);
-					game.enterState (AppGame.PAGES_PLAYERS);
-				}
-			},
-			new MenuItem (AppGame.TITLES [AppGame.GAMES_PAINT_WORLD]) {
-				public void itemSelected () {
-					Players players = (Players) game.getState (AppGame.PAGES_PLAYERS);
-					players.setPreviousID (AppGame.PAGES_GAMES);
-					players.setNextID (AppGame.GAMES_PAINT_WORLD);
+					players.setNextID (AppGame.GAMES_MAZE_WORLD);
+					pause.setPreviousID (AppGame.GAMES_MAZE_WORLD);
+					pause.setNextID (AppGame.PAGES_GAMES);
 					game.enterState (AppGame.PAGES_PLAYERS);
 				}
 			},
@@ -60,7 +40,7 @@ public class Games extends AppMenu {
 					AppGame appGame = (AppGame) game;
 					for (int i = appGame.appPlayers.size () - 1; i >= 0; i--) {
 						appGame.availableColorIDs.add (0, appGame.appPlayers.remove (i).getColorID ());
-					};
+					}
 					appGame.enterState (AppGame.PAGES_WELCOME, new FadeOutTransition (), new FadeInTransition ());
 				}
 			}

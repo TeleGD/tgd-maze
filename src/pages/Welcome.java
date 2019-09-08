@@ -3,20 +3,22 @@ package pages;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import org.newdawn.slick.SlickException;
-import org.newdawn.slick.opengl.EmptyImageData;
+import org.newdawn.slick.Input;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.state.transition.FadeInTransition;
 import org.newdawn.slick.state.transition.FadeOutTransition;
 
 import app.AppGame;
 import app.AppInput;
+import app.AppLoader;
 import app.AppPage;
 import app.AppPlayer;
 
 public class Welcome extends AppPage {
 
-	private int ID;
+	private boolean backFlag;
+	private boolean forwardFlag;
+	private int gameMasterID;
 
 	private Image logo;
 
@@ -36,18 +38,17 @@ public class Welcome extends AppPage {
 	private int logoNaturalHeight;
 
 	public Welcome (int ID) {
-		this.ID = ID;
-	}
-
-	@Override
-	public int getID () {
-		return this.ID;
+		super (ID);
 	}
 
 	@Override
 	public void init (GameContainer container, StateBasedGame game) {
 		super.initSize (container, game, 600, 400);
 		super.init (container, game);
+
+		this.backFlag = false;
+		this.forwardFlag = false;
+		this.gameMasterID = AppInput.ANY_CONTROLLER;
 
 		this.hintBoxX = this.contentX;
 		this.hintBoxY = this.contentY;
@@ -64,40 +65,44 @@ public class Welcome extends AppPage {
 		this.hintBlink = true;
 
 		this.setHint ("PRESS [START]");
-		Image logo;
-		try {
-			logo = new Image ("images/logo.png");
-		} catch (SlickException exception) {
-			logo = new Image (new EmptyImageData (0, 0));
-		}
-		this.setLogo (logo);
+		this.setLogo (AppLoader.loadPicture ("/images/logo.png"));
 	}
 
 	@Override
-	public void update (GameContainer container, StateBasedGame game, int  delta) {
-		super.update (container, game, delta);
-		AppInput appInput = (AppInput) container.getInput ();
-		AppGame appGame = (AppGame) game;
-		if (appInput.isKeyDown (AppInput.KEY_ESCAPE)) {
-			container.exit ();
+	public void poll (GameContainer container, StateBasedGame game, Input user) {
+		super.poll (container, game, user);
+		AppInput input = (AppInput) container.getInput ();
+		this.backFlag = false;
+		this.forwardFlag = false;
+		this.gameMasterID = AppInput.ANY_CONTROLLER;
+		if (input.isKeyDown (AppInput.KEY_ESCAPE)) {
+			this.backFlag = true;
+		} else if (input.isKeyDown (AppInput.KEY_ENTER)) {
+			this.forwardFlag = true;
+			this.gameMasterID = 0; /* Magic number */
 		} else {
-			int gameMasterID = AppInput.ANY_CONTROLLER;
-			if (appInput.isKeyDown (AppInput.KEY_ENTER)) {
-				gameMasterID = 0; /* Magic number */
-			} else {
-				for (int i = appInput.getControllerCount () - 1; i >= 0; i--) {
-					if (appInput.isButtonPressed (AppInput.BUTTON_A | AppInput.BUTTON_PLUS, i)) {
-						gameMasterID = i;
-						break;
-					}
+			for (int i = input.getControllerCount () - 1; i >= 0; i--) {
+				if (input.isButtonPressed (AppInput.BUTTON_A | AppInput.BUTTON_PLUS, i)) {
+					this.forwardFlag = true;
+					this.gameMasterID = i;
+					break;
 				}
 			}
-			if (gameMasterID != AppInput.ANY_CONTROLLER) {
-				int colorID = appGame.availableColorIDs.remove (0);
-				String name = "Joueur " + AppPlayer.COLOR_NAMES [colorID]; // TODO: set user name
-				appGame.appPlayers.add (0, new AppPlayer (colorID, gameMasterID, name, AppInput.BUTTON_A | AppInput.BUTTON_PLUS));
-				appGame.enterState (AppGame.PAGES_GAMES, new FadeOutTransition (), new FadeInTransition ());
-			}
+		}
+	}
+
+	@Override
+	public void update (GameContainer container, StateBasedGame game, int delta) {
+		super.update (container, game, delta);
+		AppGame appGame = (AppGame) game;
+		if (this.backFlag) {
+			container.exit ();
+		}
+		if (this.forwardFlag) {
+			int colorID = appGame.availableColorIDs.remove (0);
+			String name = "Joueur " + AppPlayer.COLOR_NAMES [colorID]; // TODO: set user name
+			appGame.appPlayers.add (0, new AppPlayer (colorID, this.gameMasterID, name, AppInput.BUTTON_A | AppInput.BUTTON_PLUS));
+			appGame.enterState (AppGame.PAGES_GAMES, new FadeOutTransition (), new FadeInTransition ());
 		}
 	}
 
@@ -127,11 +132,13 @@ public class Welcome extends AppPage {
 		this.logo = logo.copy ();
 		this.logoNaturalWidth = logo.getWidth ();
 		this.logoNaturalHeight = logo.getHeight ();
-		this.logoWidth = Math.min (this.logoBoxWidth, this.logoNaturalWidth);
-		this.logoHeight = Math.min (this.logoBoxHeight, this.logoNaturalHeight);
-		if (this.logoWidth * this.logoNaturalHeight < this.logoNaturalWidth * this.logoHeight) {
+		this.logoWidth = Math.min (Math.max (this.logoBoxWidth, 0), this.logoNaturalWidth);
+		this.logoHeight = Math.min (Math.max (this.logoBoxHeight, 0), this.logoNaturalHeight);
+		int a = this.logoWidth * this.logoNaturalHeight;
+		int b = this.logoNaturalWidth * this.logoHeight;
+		if (a < b) {
 			this.logoHeight = this.logoNaturalHeight * this.logoWidth / this.logoNaturalWidth;
-		} else {
+		} else if (b < a) {
 			this.logoWidth = this.logoNaturalWidth * this.logoHeight / this.logoNaturalHeight;
 		}
 		this.logoX = this.logoBoxX + (this.logoBoxWidth - this.logoWidth) / 2;
