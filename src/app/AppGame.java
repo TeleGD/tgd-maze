@@ -17,7 +17,7 @@ public abstract class AppGame extends StateBasedGame {
 	// public static final int PAGES_SCORES = 4;
 	public static final int GAMES_MAZE_WORLD = 4;
 
-	public static final String [] TITLES = new String [] {
+	public static final String[] TITLES = new String[] {
 		"Accueil",
 		"Menu des jeux",
 		"Menu des joueurs",
@@ -25,34 +25,35 @@ public abstract class AppGame extends StateBasedGame {
 		"Maze"
 	};
 
-	public List <AppPlayer> appPlayers;
-	public List <Integer> availableColorIDs;
+	public List<AppPlayer> appPlayers;
+	public List<Integer> availableColorIDs;
 
-	public AppGame (String name, int width, int height, boolean fullscreen) {
-		super (name);
-		this.appPlayers = new ArrayList <AppPlayer> ();
-		this.availableColorIDs = new ArrayList <Integer> ();
+	public AppGame(String name, int width, int height, boolean fullscreen) {
+		super(name);
+		this.appPlayers = new ArrayList<AppPlayer>();
+		this.availableColorIDs = new ArrayList<Integer>();
 		for (int i = 0, l = AppPlayer.COLOR_NAMES.length; i < l; i++) {
-			this.availableColorIDs.add (i);
+			this.availableColorIDs.add(i);
 		}
 		try {
-			AppContainer container = new AppContainer (this, width, height, fullscreen);
-			container.setTargetFrameRate (60);
-			container.setVSync (true);
-			container.setShowFPS (false);
-			container.start ();
+			AppContainer container = new AppContainer(this, width, height, fullscreen);
+			container.setTargetFrameRate(60);
+			container.setVSync(true);
+			container.setShowFPS(false);
+			container.setIcon(AppLoader.resolve("/images/icon.png"));
+			container.start();
 		} catch (SlickException error) {}
 	}
 
 	@Override
-	public void initStatesList (GameContainer container) {
-		this.init ();
+	public void initStatesList(GameContainer container) {
+		this.init();
 	}
 
-	public abstract void init ();
+	public abstract void init();
 
-	public final void poll (GameContainer container, Input i) {
-		((AppState) super.getCurrentState ()).poll (container, this, i);
+	public final void poll(GameContainer container, Input i) {
+		((AppState) super.getCurrentState()).poll(container, this, i);
 	}
 
 }

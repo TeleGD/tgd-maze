@@ -9,19 +9,19 @@ public abstract class AppState extends BasicGameState {
 
 	private int ID;
 
-	public AppState (int ID) {
-		this.setID (ID);
+	public AppState(int ID) {
+		this.setID(ID);
 	}
 
-	private void setID (int ID) {
+	private void setID(int ID) {
 		this.ID = ID;
 	}
 
 	@Override
-	public final int getID () {
+	public final int getID() {
 		return this.ID;
 	}
 
-	public void poll (GameContainer container, StateBasedGame game, Input i) {}
+	public void poll(GameContainer container, StateBasedGame game, Input i) {}
 
 }

@@ -4,7 +4,6 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Font;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.StateBasedGame;
 
 import app.AppFont;
@@ -62,13 +61,13 @@ public class Button extends TGDComponent{
 
 	//SLICK METHOD
 
-	public void update(GameContainer container,StateBasedGame game, int delta) throws SlickException{
+	public void update(GameContainer container,StateBasedGame game, int delta) {
 		super.update(container, game, delta);
 		if(mouseEntered) hasFocus=true;
 	}
 
 	@Override
-	public void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
+	public void render(GameContainer container, StateBasedGame game, Graphics g) {
 		super.render(container, game, g);
 
 		if(mousePressed)g.setColor(textColorPressed);

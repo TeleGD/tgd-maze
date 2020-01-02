@@ -6,7 +6,6 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.KeyListener;
 import org.newdawn.slick.MouseListener;
-import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.state.StateBasedGame;
 
@@ -62,11 +61,11 @@ public class TGDComponent extends Rectangle implements MouseListener, KeyListene
 
 	}
 
-	public void update(GameContainer container,StateBasedGame game, int delta) throws SlickException{
+	public void update(GameContainer container,StateBasedGame game, int delta) {
 		time=System.currentTimeMillis();
 	}
 
-	public void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
+	public void render(GameContainer container, StateBasedGame game, Graphics g) {
 		g.setAntiAlias(true);
 		g.resetLineWidth();
 

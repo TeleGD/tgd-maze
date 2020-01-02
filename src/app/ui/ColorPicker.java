@@ -3,7 +3,6 @@ package app.ui;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.StateBasedGame;
 
 @SuppressWarnings("serial")
@@ -31,7 +30,7 @@ public class ColorPicker extends TGDComponent {
 	}
 
 	@Override
-	public void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
+	public void render(GameContainer container, StateBasedGame game, Graphics g) {
 		super.render(container, game, g);
 		float h = height-paddingTop-paddingBottom;
 		float w = width -paddingLeft-paddingRight;
@@ -78,7 +77,7 @@ public class ColorPicker extends TGDComponent {
 		bouton.setY(y+5*(height-(paddingBottom-paddingTop))/6);
 	}
 	@Override
-	public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
+	public void update(GameContainer container, StateBasedGame game, int delta) {
 		super.update(container, game, delta);
 		bouton.update(container, game, delta);
 	}
