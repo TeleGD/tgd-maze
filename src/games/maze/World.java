@@ -1,6 +1,5 @@
 package games.maze;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import org.newdawn.slick.GameContainer;
@@ -15,10 +14,9 @@ import games.maze.players.VictimPlayer;
 
 public class World extends AppWorld {
 
-	public final static String GAME_FOLDER_NAME = "maze";
-	public final static String DIRECTORY_SOUNDS = "sounds" + File.separator + GAME_FOLDER_NAME + File.separator;
-	public final static String DIRECTORY_MUSICS = "musics" + File.separator + GAME_FOLDER_NAME + File.separator;
-	public final static String DIRECTORY_IMAGES = "images" + File.separator + GAME_FOLDER_NAME + File.separator;
+	public final static String DIRECTORY_SOUNDS = "/sounds/maze/";
+	public final static String DIRECTORY_MUSICS = "/musics/maze/";
+	public final static String DIRECTORY_IMAGES = "/images/maze/";
 	public Board board;
 	public ArrayList<Player> players;
 	private int height;

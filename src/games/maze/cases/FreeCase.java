@@ -1,7 +1,8 @@
 package games.maze.cases;
 
 import org.newdawn.slick.Image;
-import org.newdawn.slick.SlickException;
+
+import app.AppLoader;
 
 import games.maze.Case;
 import games.maze.World;
@@ -13,11 +14,7 @@ public class FreeCase extends Case {
 	private static Image image;
 
 	static {
-		try {
-			image = new Image(World.DIRECTORY_IMAGES + "ground.png");
-		} catch (SlickException e) {
-			e.printStackTrace();
-		}
+		image = AppLoader.loadPicture(World.DIRECTORY_IMAGES + "ground.png");
 	}
 
 	public FreeCase(int i, int j, int size) {

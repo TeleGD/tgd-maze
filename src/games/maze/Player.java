@@ -3,10 +3,10 @@ package games.maze;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.StateBasedGame;
 
 import app.AppInput;
+import app.AppLoader;
 import app.AppPlayer;
 
 public abstract class Player {
@@ -39,11 +39,7 @@ public abstract class Player {
 	protected int controllerID;
 	protected int id;
 	static {
-		try {
-			spriteDown = new Image(World.DIRECTORY_IMAGES + "avatar.png");
-		} catch (SlickException e) {
-			e.printStackTrace();
-		}
+		spriteDown = AppLoader.loadPicture(World.DIRECTORY_IMAGES + "avatar.png");
 	}
 
 	public Player(World w, AppPlayer appPlayer, int id) {
